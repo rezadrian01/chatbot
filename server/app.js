@@ -51,7 +51,7 @@ app
   .use("/images", express.static(path.join(__dirname, "images")))
   .use(bodyParser.json());
 
-app.get("/chatbot", async (req, res, next) => {
+app.post("/chatbot", async (req, res, next) => {
   try {
     const prompt = req.body.prompt;
     const result = await runGemini(prompt);

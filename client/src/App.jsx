@@ -1,3 +1,15 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import MainPage from "./pages/Main";
+import { action as sendPromptAction } from "./components/ChatArea";
+
 export default function App() {
-  return <h1 className="text-xl">Hello world</h1>;
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <MainPage />,
+      action: sendPromptAction,
+    },
+  ]);
+
+  return <RouterProvider router={router} />;
 }
