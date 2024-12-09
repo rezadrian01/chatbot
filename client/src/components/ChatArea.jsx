@@ -5,17 +5,22 @@ import {
   Form,
   useSubmit,
   useNavigation,
+  useLocation,
 } from "react-router-dom";
 
-export default function ChatArea() {
-  const [promptResponse, setPromptResponse] = useState({
-    prompts: [],
-    responses: [],
-  });
+export default function ChatArea({ promptResponse, setPromptResponse }) {
+  // const [promptResponse, setPromptResponse] = useState({
+  //   prompts: [],
+  //   responses: [],
+  // });
   const resultAction = useActionData();
   const submit = useSubmit();
   const navigation = useNavigation();
   const input = useRef();
+  const location = useLocation();
+
+  const isChatbot = location.pathname === '/chatbot';
+
   useEffect(() => {
     if (resultAction) {
       setPromptResponse((prevResponse) => {
@@ -30,12 +35,14 @@ export default function ChatArea() {
   }, [resultAction]);
 
   const submitting = navigation.state === "submitting";
+
   function handleSubmit(event) {
     event.preventDefault();
     const fd = new FormData(event.target);
     // const prompt = Object.fromEntries(fd.entries());
     const prompt = fd.get("prompt");
     setPromptResponse((prevPrompts) => {
+      console.log(prevPrompts)
       const updatedPrompts = [...prevPrompts.prompts];
       updatedPrompts.push(prompt);
       return {
@@ -44,13 +51,12 @@ export default function ChatArea() {
       };
     });
     input.current.value = "";
-    submit(fd, { method: "POST" });
+    submit(fd, { method: "POST", data: 'test' });
     return;
   }
 
   return (
     <>
-      <h1 className="font-semibold text-xl">Chatbot</h1>
       <div className="min-h-[93vh] overflow-y-auto flex flex-col justify-between pb-32 pt-6">
         <ul className="flex flex-col gap-8">
           {promptResponse.prompts &&
@@ -79,7 +85,7 @@ export default function ChatArea() {
               className="bg-zinc-100 px-3 py-1 rounded-full focus:outline-none w-full"
               placeholder="Input some prompt..."
               type="text"
-              name="prompt"
+              name={isChatbot ? "prompt" : "text"}
               id="prompt"
             />
             <button
@@ -94,24 +100,4 @@ export default function ChatArea() {
       </div>
     </>
   );
-}
-
-export async function action({ request }) {
-  const fd = await request.formData();
-
-  const response = await fetch(`${import.meta.env.VITE_API_DOMAIN}/chatbot`, {
-    method: request.method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ prompt: fd.get("prompt") }),
-  });
-  const resData = await response.json();
-  if (!response.ok) {
-    throw json(
-      { message: "Failed to send prompt" },
-      { status: response.status || 500 }
-    );
-  }
-  return resData;
 }
